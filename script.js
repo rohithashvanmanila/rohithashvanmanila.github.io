@@ -60,10 +60,45 @@ document.addEventListener("DOMContentLoaded", function () {
   let expandedCard = null;
   let isClosing = false;
   let updatePortraitLayout = () => {};
+  let currentAnim = null;
+  let activeObjectUrls = [];
 
-  const curve = "cubic-bezier(0.22, 1, 0.36, 1)";
-  const morphDuration = 420;
-  const panelDuration = 280;
+  function getAnimationConfig() {
+    const isMobile = window.innerWidth <= 700;
+    if (isMobile) {
+      return {
+        curve: "cubic-bezier(0.16, 1, 0.3, 1)",
+        morphDuration: 560,
+        panelDuration: 320,
+        backdropDuration: 360
+      };
+    }
+
+    return {
+      curve: "cubic-bezier(0.22, 1, 0.36, 1)",
+      morphDuration: 420,
+      panelDuration: 280,
+      backdropDuration: 280
+    };
+  }
+
+  function revokeActiveObjectUrls() {
+    activeObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+    activeObjectUrls = [];
+  }
+
+  async function applyBlobUrl(element, mediaUrl) {
+    try {
+      const res = await fetch(mediaUrl, { cache: "force-cache" });
+      if (!res.ok) throw new Error(`Failed to fetch media: ${res.status}`);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      activeObjectUrls.push(blobUrl);
+      element.src = blobUrl;
+    } catch (_) {
+      element.src = mediaUrl;
+    }
+  }
 
   /* ===== RENDER PROJECTS ===== */
   projects.forEach(project => {
@@ -121,6 +156,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function openCard(card) {
   if (expandedCard || isClosing) return;
+  currentAnim = getAnimationConfig();
+  const { curve, morphDuration, backdropDuration } = currentAnim;
   activeCard = card;
   document.body.style.overflow = "hidden";
 
@@ -144,15 +181,18 @@ function openCard(card) {
 
   const video = document.createElement("video");
   video.className = "main-video";
-  video.src = project.video;
+  video.src = "";
   video.muted = true;
   video.autoplay = true;
   video.playsInline = true;
   video.controls = true;
   video.preload = "metadata";
+  video.setAttribute("controlsList", "nodownload");
+  video.addEventListener("contextmenu", (e) => e.preventDefault());
   video.style.opacity = "0";
   primaryMedia.appendChild(video);
   mediaWrapper.appendChild(primaryMedia);
+  applyBlobUrl(video, project.video);
 
   updatePortraitLayout = () => {};
 
@@ -190,9 +230,11 @@ function openCard(card) {
 
       const gifImg = document.createElement("img");
       gifImg.className = "gif-thumb";
-      gifImg.src = gifPath;
+      gifImg.src = "";
       gifImg.alt = `${project.title} gif ${gifIndex + 1}`;
       gifImg.loading = "lazy";
+      gifImg.decoding = "async";
+      applyBlobUrl(gifImg, gifPath);
       gifImg.addEventListener("error", () => {
         gifItem.remove();
         if (!gifStrip.children.length) {
@@ -254,6 +296,7 @@ function openCard(card) {
   closeBtn.addEventListener("click", closeActiveCard);
 
   backdrop.style.display = "block";
+  backdrop.style.transition = `opacity ${backdropDuration}ms ease`;
   requestAnimationFrame(() => {
     backdrop.style.opacity = "1";
   });
@@ -297,6 +340,7 @@ function openCard(card) {
 function closeActiveCard() {
   if (!expandedCard || !activeCard || isClosing) return;
   isClosing = true;
+  const { morphDuration, panelDuration } = currentAnim || getAnimationConfig();
 
   const localExpandedCard = expandedCard;
   const rect = activeCard.getBoundingClientRect();
@@ -324,9 +368,11 @@ function closeActiveCard() {
       backdrop.style.display = "none";
       document.body.style.overflow = "auto";
       activeCard.style.visibility = "";
+      revokeActiveObjectUrls();
       expandedCard = null;
       activeCard = null;
       isClosing = false;
+      currentAnim = null;
       updatePortraitLayout = () => {};
     }, morphDuration);
   }, panelDuration);
