@@ -624,24 +624,65 @@ body {
 /* ============================= */
 
 @media (max-width: 700px) {
-  .media-wrapper.portrait-media {
+  .scroll-cue {
+    bottom: 44px;
+  }
+
+  .expanded-project.expanded-open {
+    flex-direction: column;
+  }
+
+  .expanded-project.expanded-open .media-wrapper {
+    flex: 0 0 auto;
+    margin-bottom: 0;
+    overflow: visible;
+  }
+
+  .expanded-project.expanded-open .content-side {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 18px;
+    margin-top: 0;
+  }
+
+  .expanded-project:not(.portrait-project).expanded-open .media-wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .expanded-project:not(.portrait-project) .gif-strip {
+    flex: 0 0 var(--gif-strip-height, clamp(82px, 14vh, 120px));
+    flex-basis: var(--gif-strip-height, clamp(82px, 14vh, 120px));
+    min-height: var(--gif-strip-height, clamp(82px, 14vh, 120px));
+    width: 100%;
+  }
+
+  .expanded-project.portrait-project.expanded-open .media-wrapper {
+    height: min(58vh, 520px);
     display: grid;
     grid-template-columns: auto minmax(96px, 1fr);
     grid-template-rows: 100%;
     align-items: stretch;
   }
 
-  .media-wrapper.portrait-media .primary-media {
-    height: 100%;
-    min-height: 100%;
+  .expanded-project.portrait-project.expanded-open .content-side {
+    flex-basis: auto;
+    margin-top: 0;
   }
 
-  .media-wrapper.portrait-media .gif-strip {
-    flex: 0 0 auto;
-    flex-basis: auto;
-    width: 100%;
-    min-height: 0;
+  .expanded-project.portrait-project .primary-media {
+    width: auto;
     height: 100%;
+    min-height: 100%;
+    aspect-ratio: var(--media-aspect, 9 / 16);
+    justify-self: start;
+    align-self: stretch;
+  }
+
+  .expanded-project.portrait-project .gif-strip {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
     display: grid;
     grid-template-columns: repeat(var(--portrait-gif-cols, 2), minmax(0, 1fr));
     grid-auto-rows: max-content;
@@ -652,28 +693,15 @@ body {
     overflow-y: auto;
   }
 
-  .media-wrapper.portrait-media .gif-item {
+  .expanded-project.portrait-project .gif-item {
     width: 100%;
     height: auto;
   }
 
-  .media-wrapper.portrait-media .gif-thumb {
+  .expanded-project.portrait-project .gif-thumb {
     width: 100%;
     height: auto;
     object-fit: contain;
-  }
-
-  .expanded-project.expanded-open {
-    flex-direction: column;
-  }
-
-  .expanded-project.expanded-open .media-wrapper {
-    flex-basis: auto;
-  }
-
-  .expanded-project.expanded-open .content-side {
-    flex-basis: 42%;
-    padding: 18px;
   }
 
   .primary-media img {
