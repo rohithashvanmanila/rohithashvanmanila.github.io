@@ -116,6 +116,8 @@ document.addEventListener("DOMContentLoaded", function () {
   let isClosing = false;
   let updatePortraitLayout = () => {};
   let currentAnim = null;
+  let activeObjectUrls = [];
+  const BLOB_DEBUG = false;
 
   function getAnimationConfig() {
     const isMobile = window.innerWidth <= 700;
@@ -136,11 +138,65 @@ document.addEventListener("DOMContentLoaded", function () {
     };
   }
 
-  function applyBlobUrl(element, mediaUrl) {
+  function revokeActiveObjectUrls() {
+    activeObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+    activeObjectUrls = [];
+  }
+
+  function inferMimeFromPath(path, tagName) {
+    const lower = (path || "").toLowerCase();
+    if (tagName === "VIDEO") {
+      if (lower.endsWith(".webm")) return "video/webm";
+      if (lower.endsWith(".mp4")) return "video/mp4";
+      return "video/webm";
+    }
+    if (lower.endsWith(".svg")) return "image/svg+xml";
+    if (lower.endsWith(".webp")) return "image/webp";
+    if (lower.endsWith(".png")) return "image/png";
+    if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+    return "image/*";
+  }
+
+  async function applyBlobUrl(element, mediaUrl, trackForRevoke = true) {
     const directUrl = new URL(mediaUrl, SCRIPT_BASE_URL).href;
-    element.src = directUrl;
-    if (element.tagName === "VIDEO") {
-      element.load();
+    try {
+      const res = await fetch(directUrl, { cache: "force-cache" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const rawBlob = await res.blob();
+      const expectedMime = inferMimeFromPath(directUrl, element.tagName);
+      const receivedMime = (rawBlob.type || "").toLowerCase();
+
+      if (receivedMime.startsWith("text/html")) {
+        throw new Error("Received HTML instead of media");
+      }
+
+      let finalBlob = rawBlob;
+      if (!receivedMime || receivedMime === "application/octet-stream") {
+        finalBlob = rawBlob.slice(0, rawBlob.size, expectedMime);
+      }
+
+      const blobUrl = URL.createObjectURL(finalBlob);
+      if (trackForRevoke) {
+        activeObjectUrls.push(blobUrl);
+      }
+
+      element.src = blobUrl;
+      if (element.tagName === "VIDEO") {
+        element.load();
+      }
+    } catch (error) {
+      if (BLOB_DEBUG) {
+        console.error("[blob] failed", {
+          url: directUrl,
+          target: element.tagName,
+          error: error?.message || error
+        });
+      }
+      element.src = directUrl;
+      if (element.tagName === "VIDEO") {
+        element.load();
+      }
     }
   }
 
@@ -198,7 +254,7 @@ document.addEventListener("DOMContentLoaded", function () {
     `;
     const cardImg = card.querySelector("img");
     cardImg.decoding = "async";
-    applyBlobUrl(cardImg, project.thumb);
+    applyBlobUrl(cardImg, project.thumb, false);
     cardImg.addEventListener("error", () => {
       card.classList.add("media-missing");
     });
@@ -359,7 +415,7 @@ function openCard(card) {
           ${tools.map((tool) => {
             const iconPath = toolIcons[tool];
             if (iconPath) {
-              return `<span class="tool-icon-chip" title="${tool}" aria-label="${tool}"><img src="${iconPath}" alt="${tool}"></span>`;
+              return `<span class="tool-icon-chip" title="${tool}" aria-label="${tool}"><img src="" data-src="${iconPath}" alt="${tool}"></span>`;
             }
             return `<span class="tool-text-fallback">${tool}</span>`;
           }).join("")}
@@ -389,6 +445,13 @@ function openCard(card) {
   expandedCard.appendChild(mediaWrapper);
   expandedCard.appendChild(content);
   expandedCard.appendChild(closeBtn);
+
+  const toolIconNodes = content.querySelectorAll(".tool-icon-chip img[data-src]");
+  toolIconNodes.forEach((iconImg) => {
+    const iconPath = iconImg.getAttribute("data-src");
+    if (!iconPath) return;
+    applyBlobUrl(iconImg, iconPath);
+  });
 
   activeCard.style.visibility = "hidden";
   document.body.appendChild(expandedCard);
@@ -467,6 +530,7 @@ function closeActiveCard() {
       backdrop.style.display = "none";
       document.body.style.overflow = "auto";
       activeCard.style.visibility = "";
+      revokeActiveObjectUrls();
       expandedCard = null;
       activeCard = null;
       isClosing = false;
