@@ -117,7 +117,16 @@ document.addEventListener("DOMContentLoaded", function () {
   let updatePortraitLayout = () => {};
   let currentAnim = null;
   let activeObjectUrls = [];
-  const BLOB_DEBUG = false;
+
+  function lockMediaInteractions(root = document) {
+    const mediaNodes = root.querySelectorAll("img, video");
+    mediaNodes.forEach((node) => {
+      node.setAttribute("draggable", "false");
+      node.setAttribute("oncontextmenu", "return false;");
+      node.addEventListener("dragstart", (e) => e.preventDefault());
+      node.addEventListener("contextmenu", (e) => e.preventDefault());
+    });
+  }
 
   function getAnimationConfig() {
     const isMobile = window.innerWidth <= 700;
@@ -186,13 +195,6 @@ document.addEventListener("DOMContentLoaded", function () {
         element.load();
       }
     } catch (error) {
-      if (BLOB_DEBUG) {
-        console.error("[blob] failed", {
-          url: directUrl,
-          target: element.tagName,
-          error: error?.message || error
-        });
-      }
       element.src = directUrl;
       if (element.tagName === "VIDEO") {
         element.load();
@@ -254,6 +256,9 @@ document.addEventListener("DOMContentLoaded", function () {
     `;
     const cardImg = card.querySelector("img");
     cardImg.decoding = "async";
+    cardImg.setAttribute("draggable", "false");
+    cardImg.addEventListener("dragstart", (e) => e.preventDefault());
+    cardImg.addEventListener("contextmenu", (e) => e.preventDefault());
     applyBlobUrl(cardImg, project.thumb, false);
     cardImg.addEventListener("error", () => {
       card.classList.add("media-missing");
@@ -300,7 +305,7 @@ document.addEventListener("DOMContentLoaded", function () {
     };
   }
 
-function openCard(card) {
+  function openCard(card) {
   if (expandedCard || isClosing) return;
   currentAnim = getAnimationConfig();
   const { curve, morphDuration, backdropDuration } = currentAnim;
@@ -323,6 +328,9 @@ function openCard(card) {
   thumb.src = thumbSrc;
   thumb.alt = project.title;
   thumb.loading = "lazy";
+  thumb.setAttribute("draggable", "false");
+  thumb.addEventListener("dragstart", (e) => e.preventDefault());
+  thumb.addEventListener("contextmenu", (e) => e.preventDefault());
   primaryMedia.appendChild(thumb);
 
   const video = document.createElement("video");
@@ -334,6 +342,7 @@ function openCard(card) {
   video.controls = true;
   video.preload = "metadata";
   video.setAttribute("controlsList", "nodownload");
+  video.setAttribute("disablePictureInPicture", "true");
   video.addEventListener("contextmenu", (e) => e.preventDefault());
   video.style.opacity = "0";
   primaryMedia.appendChild(video);
@@ -450,8 +459,13 @@ function openCard(card) {
   toolIconNodes.forEach((iconImg) => {
     const iconPath = iconImg.getAttribute("data-src");
     if (!iconPath) return;
+    iconImg.setAttribute("draggable", "false");
+    iconImg.addEventListener("dragstart", (e) => e.preventDefault());
+    iconImg.addEventListener("contextmenu", (e) => e.preventDefault());
     applyBlobUrl(iconImg, iconPath);
   });
+
+  lockMediaInteractions(expandedCard);
 
   activeCard.style.visibility = "hidden";
   document.body.appendChild(expandedCard);
@@ -563,5 +577,11 @@ function closeActiveCard() {
   });
 
   window.closeActiveCard = closeActiveCard;
+  lockMediaInteractions(document);
+  document.addEventListener("contextmenu", (e) => {
+    if (e.target.closest("img, video, .tool-icon-chip")) {
+      e.preventDefault();
+    }
+  });
 
 });
