@@ -148,8 +148,21 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function revokeActiveObjectUrls() {
-    activeObjectUrls.forEach((url) => URL.revokeObjectURL(url));
-    activeObjectUrls = [];
+    if (!activeObjectUrls.length) return;
+
+    const usedBlobUrls = new Set(
+      [...document.querySelectorAll("img, video, source")]
+        .map((el) => el.currentSrc || el.src || "")
+        .filter((src) => src.startsWith("blob:"))
+    );
+
+    const revokeQueue = activeObjectUrls.filter((url) => !usedBlobUrls.has(url));
+    activeObjectUrls = activeObjectUrls.filter((url) => usedBlobUrls.has(url));
+
+    // Delay revoke slightly so browsers finish pending decode/load tasks.
+    window.setTimeout(() => {
+      revokeQueue.forEach((url) => URL.revokeObjectURL(url));
+    }, 1500);
   }
 
   function releaseMediaSources(root) {
@@ -188,9 +201,29 @@ document.addEventListener("DOMContentLoaded", function () {
       .replace(/^\/+/, "");
   }
 
+  function applyDirectUrl(element, mediaUrl) {
+    const relativePath = normalizeMediaPath(mediaUrl);
+    const directUrl = new URL(relativePath, SCRIPT_BASE_URL).href;
+    element.src = directUrl;
+    if (element.tagName === "VIDEO") {
+      element.load();
+    }
+    return Promise.resolve(true);
+  }
+
+  function isMainVideoFile(relativePath) {
+    return /(^|\/)Vid\.webm$/i.test(relativePath);
+  }
+
   async function applyBlobUrl(element, mediaUrl, trackForRevoke = true) {
     const relativePath = normalizeMediaPath(mediaUrl);
     const directUrl = new URL(relativePath, SCRIPT_BASE_URL).href;
+
+    // Blob URL is only for the main project video (Vid.webm).
+    if (element.tagName !== "VIDEO" || !isMainVideoFile(relativePath)) {
+      return applyDirectUrl(element, mediaUrl);
+    }
+
     const fallbackToDirect = () => {
       element.src = directUrl;
       if (element.tagName === "VIDEO") {
@@ -290,7 +323,7 @@ document.addEventListener("DOMContentLoaded", function () {
     cardImg.setAttribute("draggable", "false");
     cardImg.addEventListener("dragstart", (e) => e.preventDefault());
     cardImg.addEventListener("contextmenu", (e) => e.preventDefault());
-    applyBlobUrl(cardImg, project.thumb, false).then((ok) => {
+    applyDirectUrl(cardImg, project.thumb).then((ok) => {
       if (!ok) {
         card.classList.add("media-missing");
       }
@@ -438,7 +471,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }, { once: true });
       }
 
-      applyBlobUrl(gifMedia, gifPath).then((ok) => {
+      applyDirectUrl(gifMedia, gifPath).then((ok) => {
         if (!ok) {
           gifItem.remove();
           if (!gifStrip.children.length) {
@@ -509,7 +542,7 @@ document.addEventListener("DOMContentLoaded", function () {
     iconImg.setAttribute("draggable", "false");
     iconImg.addEventListener("dragstart", (e) => e.preventDefault());
     iconImg.addEventListener("contextmenu", (e) => e.preventDefault());
-    applyBlobUrl(iconImg, iconPath).then((ok) => {
+    applyDirectUrl(iconImg, iconPath).then((ok) => {
       if (!ok) {
         iconImg.closest(".tool-icon-chip")?.remove();
       }
@@ -631,9 +664,18 @@ function closeActiveCard() {
   window.closeActiveCard = closeActiveCard;
   lockMediaInteractions(document);
   document.addEventListener("contextmenu", (e) => {
-    if (e.target.closest("img, video, .tool-icon-chip")) {
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+  document.addEventListener("keydown", (e) => {
+    const key = (e.key || "").toLowerCase();
+    const hasPrimaryModifier = e.ctrlKey || e.metaKey;
+    if (!hasPrimaryModifier) return;
+
+    if (key === "s") {
       e.preventDefault();
+      e.stopPropagation();
     }
-  });
+  }, true);
 
 });
