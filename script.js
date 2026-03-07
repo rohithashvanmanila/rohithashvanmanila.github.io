@@ -79,6 +79,7 @@ function buildProjectAssets(def) {
 
   return {
     ...def,
+    orientation: def.orientation || "",
     video: `${base}/${videoName}`,
     thumb: `${base}/${thumbName}`,
     gifs: Array.from({ length: gifCount }, (_, i) => `${base}/${gifPrefix}${i + 1}.${gifExt}`)
@@ -383,10 +384,23 @@ document.addEventListener("DOMContentLoaded", function () {
   const rect = card.getBoundingClientRect();
   const index = [...grid.children].indexOf(card);
   const project = projects[index];
-  const thumbSrc = card.querySelector("img")?.getAttribute("src") || project.thumb;
+  const gridThumb = card.querySelector("img");
+  const thumbSrc = gridThumb?.getAttribute("src") || project.thumb;
+  const thumbHasSize = Boolean(gridThumb?.naturalWidth && gridThumb?.naturalHeight);
+  const inferredPortraitFromThumb = thumbHasSize ? gridThumb.naturalHeight > gridThumb.naturalWidth : null;
+  const projectOrientation = (project.orientation || "").toLowerCase();
+  const prefersPortrait =
+    projectOrientation === "portrait" ||
+    (projectOrientation !== "landscape" && inferredPortraitFromThumb === true);
 
   const mediaWrapper = document.createElement("div");
   mediaWrapper.className = "media-wrapper";
+  if (thumbHasSize) {
+    mediaWrapper.style.setProperty("--media-aspect", `${gridThumb.naturalWidth} / ${gridThumb.naturalHeight}`);
+  }
+  if (prefersPortrait) {
+    mediaWrapper.classList.add("portrait-media");
+  }
 
   const primaryMedia = document.createElement("div");
   primaryMedia.className = "primary-media";
@@ -527,6 +541,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   expandedCard = document.createElement("article");
   expandedCard.className = "expanded-project";
+  if (prefersPortrait) {
+    expandedCard.classList.add("portrait-project");
+  }
   expandedCard.style.top = `${rect.top}px`;
   expandedCard.style.left = `${rect.left}px`;
   expandedCard.style.width = `${rect.width}px`;
