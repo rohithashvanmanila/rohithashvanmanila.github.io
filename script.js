@@ -589,8 +589,16 @@ document.addEventListener("DOMContentLoaded", function () {
   }, { once: true });
 
   video.addEventListener("error", () => {
-    video.remove();
-  }, { once: true });
+    const current = video.currentSrc || video.src || "";
+    if (current.startsWith("blob:")) {
+      // Mirror gif behavior: if blob decode fails, continue with direct URL.
+      applyDirectUrl(video, project.video);
+      return;
+    }
+    video.pause();
+    video.style.opacity = "0";
+    thumb.style.opacity = "1";
+  });
 }
 
 
