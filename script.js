@@ -166,15 +166,38 @@ document.addEventListener("DOMContentLoaded", function () {
     return "image/*";
   }
 
+  function normalizeMediaPath(mediaPath) {
+    return String(mediaPath || "")
+      .trim()
+      .replace(/\\/g, "/")
+      .replace(/^\.\//, "")
+      .replace(/^\/+/, "");
+  }
+
+  function markMediaLoadFailure(element, mediaPath, reason) {
+    element.setAttribute("data-media-error", reason || "load-failed");
+    element.setAttribute("data-media-path", mediaPath || "");
+    if (element.tagName === "IMG") {
+      element.alt = "Media unavailable";
+    }
+    const card = element.closest(".project-card");
+    if (card) {
+      card.classList.add("media-missing");
+      card.title = `Missing media: ${mediaPath}`;
+    }
+  }
+
   async function applyBlobUrl(element, mediaUrl, trackForRevoke = true) {
-    const directUrl = new URL(mediaUrl, SCRIPT_BASE_URL).href;
+    const relativePath = normalizeMediaPath(mediaUrl);
+    const directUrl = new URL(relativePath, SCRIPT_BASE_URL).href;
     try {
       const res = await fetch(directUrl, { cache: "force-cache" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const rawBlob = await res.blob();
       const expectedMime = inferMimeFromPath(directUrl, element.tagName);
-      const receivedMime = (rawBlob.type || "").toLowerCase();
+      const headerMime = (res.headers.get("content-type") || "").toLowerCase();
+      const receivedMime = (rawBlob.type || headerMime || "").toLowerCase();
 
       if (receivedMime.startsWith("text/html")) {
         throw new Error("Received HTML instead of media");
@@ -183,6 +206,13 @@ document.addEventListener("DOMContentLoaded", function () {
       let finalBlob = rawBlob;
       if (!receivedMime || receivedMime === "application/octet-stream") {
         finalBlob = rawBlob.slice(0, rawBlob.size, expectedMime);
+      }
+
+      if (element.tagName === "VIDEO" && !finalBlob.type.startsWith("video/")) {
+        throw new Error(`Expected video, got ${finalBlob.type || "unknown"}`);
+      }
+      if (element.tagName === "IMG" && !finalBlob.type.startsWith("image/")) {
+        throw new Error(`Expected image, got ${finalBlob.type || "unknown"}`);
       }
 
       const blobUrl = URL.createObjectURL(finalBlob);
@@ -194,11 +224,10 @@ document.addEventListener("DOMContentLoaded", function () {
       if (element.tagName === "VIDEO") {
         element.load();
       }
+      return true;
     } catch (error) {
-      element.src = directUrl;
-      if (element.tagName === "VIDEO") {
-        element.load();
-      }
+      markMediaLoadFailure(element, relativePath, error?.message || "blob-load-failed");
+      return false;
     }
   }
 
@@ -259,7 +288,11 @@ document.addEventListener("DOMContentLoaded", function () {
     cardImg.setAttribute("draggable", "false");
     cardImg.addEventListener("dragstart", (e) => e.preventDefault());
     cardImg.addEventListener("contextmenu", (e) => e.preventDefault());
-    applyBlobUrl(cardImg, project.thumb, false);
+    applyBlobUrl(cardImg, project.thumb, false).then((ok) => {
+      if (!ok) {
+        card.classList.add("media-missing");
+      }
+    });
     cardImg.addEventListener("error", () => {
       card.classList.add("media-missing");
     });
@@ -347,7 +380,12 @@ document.addEventListener("DOMContentLoaded", function () {
   video.style.opacity = "0";
   primaryMedia.appendChild(video);
   mediaWrapper.appendChild(primaryMedia);
-  applyBlobUrl(video, project.video);
+  applyBlobUrl(video, project.video).then((ok) => {
+    if (!ok) {
+      video.remove();
+      thumb.style.opacity = "1";
+    }
+  });
 
   updatePortraitLayout = () => {};
 
@@ -398,7 +436,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }, { once: true });
       }
 
-      applyBlobUrl(gifMedia, gifPath);
+      applyBlobUrl(gifMedia, gifPath).then((ok) => {
+        if (!ok) {
+          gifItem.remove();
+          if (!gifStrip.children.length) {
+            gifStrip.remove();
+          }
+        }
+      });
       gifMedia.addEventListener("error", () => {
         gifItem.remove();
         if (!gifStrip.children.length) {
@@ -462,7 +507,11 @@ document.addEventListener("DOMContentLoaded", function () {
     iconImg.setAttribute("draggable", "false");
     iconImg.addEventListener("dragstart", (e) => e.preventDefault());
     iconImg.addEventListener("contextmenu", (e) => e.preventDefault());
-    applyBlobUrl(iconImg, iconPath);
+    applyBlobUrl(iconImg, iconPath).then((ok) => {
+      if (!ok) {
+        iconImg.closest(".tool-icon-chip")?.remove();
+      }
+    });
   });
 
   lockMediaInteractions(expandedCard);
