@@ -152,6 +152,20 @@ document.addEventListener("DOMContentLoaded", function () {
     activeObjectUrls = [];
   }
 
+  function releaseMediaSources(root) {
+    if (!root) return;
+    root.querySelectorAll("video").forEach((v) => {
+      v.pause();
+      v.removeAttribute("src");
+      v.load();
+    });
+    root.querySelectorAll("img").forEach((img) => {
+      if ((img.src || "").startsWith("blob:")) {
+        img.removeAttribute("src");
+      }
+    });
+  }
+
   function inferMimeFromPath(path, tagName) {
     const lower = (path || "").toLowerCase();
     if (tagName === "VIDEO") {
@@ -577,6 +591,7 @@ function closeActiveCard() {
     localExpandedCard.style.height = `${rect.height}px`;
 
     setTimeout(() => {
+      releaseMediaSources(localExpandedCard);
       localExpandedCard.remove();
       backdrop.style.display = "none";
       document.body.style.overflow = "auto";
