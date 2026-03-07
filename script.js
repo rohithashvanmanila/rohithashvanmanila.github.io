@@ -30,7 +30,7 @@ const projectDefs = [
     thumbName: "Thumb.webp",
     gifCount: 4
   },
- /* {
+  /*{
     folder: "P4",
     title: "lor",
     projectType: "Editing, Typography & Motion Graphics",
@@ -174,28 +174,20 @@ document.addEventListener("DOMContentLoaded", function () {
       .replace(/^\/+/, "");
   }
 
-  function markMediaLoadFailure(element, mediaPath, reason) {
-    element.setAttribute("data-media-error", reason || "load-failed");
-    element.setAttribute("data-media-path", mediaPath || "");
-    if (element.tagName === "IMG") {
-      element.alt = "Media unavailable";
-    }
-    const card = element.closest(".project-card");
-    if (card) {
-      card.classList.add("media-missing");
-      card.title = `Missing media: ${mediaPath}`;
-    }
-  }
-
   async function applyBlobUrl(element, mediaUrl, trackForRevoke = true) {
     const relativePath = normalizeMediaPath(mediaUrl);
     const directUrl = new URL(relativePath, SCRIPT_BASE_URL).href;
+    const fallbackToDirect = () => {
+      element.src = directUrl;
+      if (element.tagName === "VIDEO") {
+        element.load();
+      }
+    };
     try {
-      const res = await fetch(directUrl, { cache: "force-cache" });
+      const res = await fetch(directUrl, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const rawBlob = await res.blob();
-      const expectedMime = inferMimeFromPath(directUrl, element.tagName);
       const headerMime = (res.headers.get("content-type") || "").toLowerCase();
       const receivedMime = (rawBlob.type || headerMime || "").toLowerCase();
 
@@ -205,14 +197,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       let finalBlob = rawBlob;
       if (!receivedMime || receivedMime === "application/octet-stream") {
+        const expectedMime = inferMimeFromPath(directUrl, element.tagName);
         finalBlob = rawBlob.slice(0, rawBlob.size, expectedMime);
-      }
-
-      if (element.tagName === "VIDEO" && !finalBlob.type.startsWith("video/")) {
-        throw new Error(`Expected video, got ${finalBlob.type || "unknown"}`);
-      }
-      if (element.tagName === "IMG" && !finalBlob.type.startsWith("image/")) {
-        throw new Error(`Expected image, got ${finalBlob.type || "unknown"}`);
       }
 
       const blobUrl = URL.createObjectURL(finalBlob);
@@ -220,14 +206,16 @@ document.addEventListener("DOMContentLoaded", function () {
         activeObjectUrls.push(blobUrl);
       }
 
+      // Some hosts/browsers fail to decode blob URLs for certain media types.
+      element.addEventListener("error", fallbackToDirect, { once: true });
       element.src = blobUrl;
       if (element.tagName === "VIDEO") {
         element.load();
       }
       return true;
     } catch (error) {
-      markMediaLoadFailure(element, relativePath, error?.message || "blob-load-failed");
-      return false;
+      fallbackToDirect();
+      return true;
     }
   }
 
