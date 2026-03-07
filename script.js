@@ -30,7 +30,7 @@ const projectDefs = [
     thumbName: "Thumb.webp",
     gifCount: 4
   },
-  {
+ /* {
     folder: "P4",
     title: "lor",
     projectType: "Editing, Typography & Motion Graphics",
@@ -59,7 +59,7 @@ const projectDefs = [
     videoName: "Vid.webm",
     thumbName: "Thumb.webp",
     gifCount: 4
-  },
+  },*/
 ];
 
 const DEFAULT_MEDIA_NAMES = {
