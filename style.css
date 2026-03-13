@@ -348,7 +348,7 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.28s linear;
 }
 
 .primary-media img {
@@ -448,12 +448,52 @@ body {
   display: block;
 }
 
+.expanded-project.portrait-project:not(.expanded-open) .media-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.expanded-project.portrait-project:not(.expanded-open) .primary-media {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+.expanded-project.portrait-project:not(.expanded-open) .gif-strip {
+  display: none;
+}
+
 .expanded-project.portrait-project.expanded-open .media-wrapper {
   flex-basis: 65%;
 }
 
 .expanded-project.portrait-project.expanded-open .content-side {
   flex-basis: 35%;
+}
+
+.expanded-project.portrait-project.expanded-open:not(.portrait-detail-ready) .media-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.expanded-project.portrait-project.expanded-open:not(.portrait-detail-ready) .primary-media {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+.expanded-project.portrait-project.expanded-open:not(.portrait-detail-ready) .gif-strip {
+  display: none;
+}
+
+.expanded-project.portrait-project.expanded-open:not(.portrait-detail-ready) .content-side {
+  opacity: 0;
+  transform: translateX(10px);
+}
+
+.expanded-project.portrait-project.expanded-open.portrait-detail-ready .content-side {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .content-side {

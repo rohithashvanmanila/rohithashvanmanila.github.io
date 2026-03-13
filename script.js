@@ -121,6 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let updatePortraitLayout = () => {};
   let currentAnim = null;
   let activeObjectUrls = [];
+  let deferredLoadTimers = [];
 
   function lockMediaInteractions(root = document) {
     const mediaNodes = root.querySelectorAll("img, video");
@@ -167,6 +168,20 @@ document.addEventListener("DOMContentLoaded", function () {
     window.setTimeout(() => {
       revokeQueue.forEach((url) => URL.revokeObjectURL(url));
     }, 1500);
+  }
+
+  function clearDeferredLoadTimers() {
+    deferredLoadTimers.forEach((timerId) => window.clearTimeout(timerId));
+    deferredLoadTimers = [];
+  }
+
+  function queueDeferredAction(callback, delay) {
+    const timerId = window.setTimeout(() => {
+      deferredLoadTimers = deferredLoadTimers.filter((id) => id !== timerId);
+      callback();
+    }, delay);
+    deferredLoadTimers.push(timerId);
+    return timerId;
   }
 
   function releaseMediaSources(root) {
@@ -235,7 +250,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     };
     try {
-      const res = await fetch(directUrl, { cache: "no-store" });
+      const res = await fetch(directUrl, { cache: "default" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const rawBlob = await res.blob();
@@ -422,7 +437,7 @@ document.addEventListener("DOMContentLoaded", function () {
   video.autoplay = true;
   video.playsInline = true;
   video.controls = true;
-  video.preload = "metadata";
+  video.preload = "auto";
   video.setAttribute("controlsList", "nodownload");
   video.setAttribute("disablePictureInPicture", "true");
   video.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -485,14 +500,29 @@ document.addEventListener("DOMContentLoaded", function () {
         }, { once: true });
       }
 
-      applyDirectUrl(gifMedia, gifPath).then((ok) => {
-        if (!ok) {
-          gifItem.remove();
-          if (!gifStrip.children.length) {
-            gifStrip.remove();
+      const loadGifMedia = () => {
+        applyDirectUrl(gifMedia, gifPath).then((ok) => {
+          if (!ok) {
+            gifItem.remove();
+            if (!gifStrip.children.length) {
+              gifStrip.remove();
+            }
           }
+        });
+      };
+
+      if (gifIndex < gifPaths.length) {
+        loadGifMedia();
+      } else {
+        if (gifMedia.tagName === "VIDEO") {
+          gifMedia.preload = "none";
         }
-      });
+        const deferredDelay = 220 + ((gifIndex - gifPaths.length) * 120);
+        queueDeferredAction(() => {
+          if (!expandedCard) return;
+          loadGifMedia();
+        }, deferredDelay);
+      }
       gifMedia.addEventListener("error", () => {
         gifItem.remove();
         if (!gifStrip.children.length) {
@@ -594,16 +624,35 @@ document.addEventListener("DOMContentLoaded", function () {
     expandedCard.style.height = `${target.height}px`;
   });
 
+  const openStateDelay = prefersPortrait ? morphDuration + 40 : Math.max(140, morphDuration - 40);
   setTimeout(() => {
     if (!expandedCard) return;
     expandedCard.classList.add("expanded-open");
-  }, morphDuration - 40);
+    if (prefersPortrait) {
+      queueDeferredAction(() => {
+        expandedCard?.classList.add("portrait-detail-ready");
+      }, 110);
+    }
+  }, openStateDelay);
 
-  video.addEventListener("loadeddata", () => {
+  let hasRevealedVideo = false;
+  let hasStartedThumbFade = false;
+  const startThumbFade = () => {
+    if (hasStartedThumbFade || !expandedCard) return;
+    hasStartedThumbFade = true;
     thumb.style.opacity = "0";
+  };
+  const revealVideo = () => {
+    if (hasRevealedVideo || !expandedCard) return;
+    hasRevealedVideo = true;
+    startThumbFade();
     video.style.opacity = "1";
     video.play().catch(() => {});
-  }, { once: true });
+  };
+
+  video.addEventListener("loadeddata", startThumbFade, { once: true });
+  video.addEventListener("loadeddata", revealVideo, { once: true });
+  video.addEventListener("canplay", revealVideo, { once: true });
 
   video.addEventListener("error", () => {
     const current = video.currentSrc || video.src || "";
@@ -626,6 +675,7 @@ function closeActiveCard() {
   if (!expandedCard || !activeCard || isClosing) return;
   isClosing = true;
   const { morphDuration, panelDuration } = currentAnim || getAnimationConfig();
+  clearDeferredLoadTimers();
 
   const localExpandedCard = expandedCard;
   const rect = activeCard.getBoundingClientRect();
@@ -655,6 +705,7 @@ function closeActiveCard() {
       document.body.style.overflow = "auto";
       activeCard.style.visibility = "";
       revokeActiveObjectUrls();
+      clearDeferredLoadTimers();
       expandedCard = null;
       activeCard = null;
       isClosing = false;
