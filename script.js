@@ -3,6 +3,7 @@ const projectDefs = [
   {
     folder: "P1",
     title: "BYJU'S | 'Champions' New Batch Launch - Promo Video",
+    orientation: "landscape", // or "portrait"
     projectType: "Video Editing, Typography Design, and Motion Graphics & Transitions",
     desc: "Promotional video created for BYJU'S to announce the launch of the 'Champions' batch. The video was designed to build excitement, highlight key program strengths, and maintain brand consistency while delivering high-energy visual storytelling. A visually engaging promo video that effectively communicates the value of the new batch and captures learner attention across digital platforms.",
     tools: ["After Effects", "Premiere Pro", "Illustrator"],
@@ -13,6 +14,7 @@ const projectDefs = [
   {
     folder: "P2",
     title: "BYJU'S | Content Marketing | Fizz - Cold vs Hot Drink",
+    orientation: "portrait", // or "landscape"
     projectType: "Editing, Typography & Motion Graphics",
     desc: "Automated corporate & marketing videos.",
     tools: ["After Effects", "Premiere Pro", "Illustrator"],
@@ -23,6 +25,7 @@ const projectDefs = [
 {
     folder: "P3",
     title: "BYJU'S | Experiment Shorts | Hot vs Cold Water ",
+    orientation: "portrait", // or "landscape"
     projectType: "Editing, Typography & Motion Graphics",
     desc: "lor",
     tools: ["After Effects", "Premiere Pro", "Illustrator"],
@@ -387,11 +390,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const gridThumb = card.querySelector("img");
   const thumbSrc = gridThumb?.getAttribute("src") || project.thumb;
   const thumbHasSize = Boolean(gridThumb?.naturalWidth && gridThumb?.naturalHeight);
-  const inferredPortraitFromThumb = thumbHasSize ? gridThumb.naturalHeight > gridThumb.naturalWidth : null;
   const projectOrientation = (project.orientation || "").toLowerCase();
-  const prefersPortrait =
-    projectOrientation === "portrait" ||
-    (projectOrientation !== "landscape" && inferredPortraitFromThumb === true);
+  const prefersPortrait = projectOrientation === "portrait";
 
   const mediaWrapper = document.createElement("div");
   mediaWrapper.className = "media-wrapper";
