@@ -25,10 +25,11 @@ const projectDefs = [
 {
     folder: "P3",
     title: "BYJU'S | Experiment Shorts | Hot vs Cold Water ",
-    orientation: "portrait", // or "landscape"
+    orientation: "landscape", // or "landscape"
     projectType: "Editing, Typography & Motion Graphics",
     desc: "lor",
     tools: ["After Effects", "Premiere Pro", "Illustrator"],
+    youtubeEmbed: "https://www.youtube.com/embed/Q02vqnFtLsQ",
     videoName: "Vid.webm",
     thumbName: "Thumb.webp",
     gifCount: 4
@@ -87,6 +88,41 @@ function buildProjectAssets(def) {
     thumb: `${base}/${thumbName}`,
     gifs: Array.from({ length: gifCount }, (_, i) => `${base}/${gifPrefix}${i + 1}.${gifExt}`)
   };
+}
+
+function getYouTubeEmbedUrl(input) {
+  const raw = String(input || "").trim();
+  if (!raw) return "";
+
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.replace(/^www\./, "");
+
+    if (host === "youtu.be") {
+      const videoId = url.pathname.split("/").filter(Boolean)[0];
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : "";
+    }
+
+    if (host === "youtube.com" || host === "m.youtube.com") {
+      if (url.pathname === "/watch") {
+        const videoId = url.searchParams.get("v");
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : "";
+      }
+
+      if (url.pathname.startsWith("/embed/")) {
+        return raw;
+      }
+
+      if (url.pathname.startsWith("/shorts/")) {
+        const videoId = url.pathname.split("/")[2];
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : "";
+      }
+    }
+  } catch (error) {
+    return raw.includes("youtube.com/embed/") ? raw : "";
+  }
+
+  return "";
 }
 
 const projects = projectDefs.map(buildProjectAssets);
@@ -407,6 +443,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const thumbHasSize = Boolean(gridThumb?.naturalWidth && gridThumb?.naturalHeight);
   const projectOrientation = (project.orientation || "").toLowerCase();
   const prefersPortrait = projectOrientation === "portrait";
+  const youtubeEmbedUrl = getYouTubeEmbedUrl(project.youtubeEmbed);
 
   const mediaWrapper = document.createElement("div");
   mediaWrapper.className = "media-wrapper";
@@ -430,35 +467,53 @@ document.addEventListener("DOMContentLoaded", function () {
   thumb.addEventListener("contextmenu", (e) => e.preventDefault());
   primaryMedia.appendChild(thumb);
 
-  const video = document.createElement("video");
-  video.className = "main-video";
-  video.src = "";
-  video.muted = true;
-  video.autoplay = true;
-  video.playsInline = true;
-  video.controls = true;
-  video.preload = "auto";
-  video.setAttribute("controlsList", "nodownload");
-  video.setAttribute("disablePictureInPicture", "true");
-  video.addEventListener("contextmenu", (e) => e.preventDefault());
-  video.style.opacity = "0";
-  primaryMedia.appendChild(video);
+  let video = null;
+  let youtubeFrame = null;
+
+  if (youtubeEmbedUrl) {
+    youtubeFrame = document.createElement("iframe");
+    youtubeFrame.className = "main-video main-youtube-embed";
+    youtubeFrame.src = youtubeEmbedUrl;
+    youtubeFrame.title = `${project.title} YouTube video`;
+    youtubeFrame.loading = "lazy";
+    youtubeFrame.referrerPolicy = "strict-origin-when-cross-origin";
+    youtubeFrame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+    youtubeFrame.allowFullscreen = true;
+    youtubeFrame.style.opacity = "0";
+    primaryMedia.appendChild(youtubeFrame);
+  } else {
+    video = document.createElement("video");
+    video.className = "main-video";
+    video.src = "";
+    video.muted = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.controls = true;
+    video.preload = "auto";
+    video.setAttribute("controlsList", "nodownload");
+    video.setAttribute("disablePictureInPicture", "true");
+    video.addEventListener("contextmenu", (e) => e.preventDefault());
+    video.style.opacity = "0";
+    primaryMedia.appendChild(video);
+  }
   mediaWrapper.appendChild(primaryMedia);
-  applyBlobUrl(video, project.video).then((ok) => {
-    if (!ok) {
-      video.remove();
-      thumb.style.opacity = "1";
-    }
-  });
+  if (video) {
+    applyBlobUrl(video, project.video).then((ok) => {
+      if (!ok) {
+        video.remove();
+        thumb.style.opacity = "1";
+      }
+    });
+  }
 
   updatePortraitLayout = () => {};
 
   const setMediaOrientationClass = () => {
-    if (video.videoWidth && video.videoHeight) {
+    if (video && video.videoWidth && video.videoHeight) {
       mediaWrapper.style.setProperty("--media-aspect", `${video.videoWidth} / ${video.videoHeight}`);
     }
 
-    if (video.videoHeight > video.videoWidth) {
+    if (video && video.videoHeight > video.videoWidth) {
       mediaWrapper.classList.add("portrait-media");
       expandedCard?.classList.add("portrait-project");
     } else {
@@ -467,7 +522,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   };
 
-  video.addEventListener("loadedmetadata", setMediaOrientationClass, { once: true });
+  if (video) {
+    video.addEventListener("loadedmetadata", setMediaOrientationClass, { once: true });
+  }
 
   const gifPaths = Array.isArray(project.gifs) ? project.gifs : [];
   if (gifPaths.length) {
@@ -646,25 +703,38 @@ document.addEventListener("DOMContentLoaded", function () {
     if (hasRevealedVideo || !expandedCard) return;
     hasRevealedVideo = true;
     startThumbFade();
-    video.style.opacity = "1";
-    video.play().catch(() => {});
-  };
-
-  video.addEventListener("loadeddata", startThumbFade, { once: true });
-  video.addEventListener("loadeddata", revealVideo, { once: true });
-  video.addEventListener("canplay", revealVideo, { once: true });
-
-  video.addEventListener("error", () => {
-    const current = video.currentSrc || video.src || "";
-    if (current.startsWith("blob:")) {
-      // Mirror gif behavior: if blob decode fails, continue with direct URL.
-      applyDirectUrl(video, project.video);
+    if (video) {
+      video.style.opacity = "1";
+      video.play().catch(() => {});
       return;
     }
-    video.pause();
-    video.style.opacity = "0";
-    thumb.style.opacity = "1";
-  });
+    if (youtubeFrame) {
+      youtubeFrame.style.opacity = "1";
+    }
+  };
+
+  if (video) {
+    video.addEventListener("loadeddata", startThumbFade, { once: true });
+    video.addEventListener("loadeddata", revealVideo, { once: true });
+    video.addEventListener("canplay", revealVideo, { once: true });
+
+    video.addEventListener("error", () => {
+      const current = video.currentSrc || video.src || "";
+      if (current.startsWith("blob:")) {
+        // Mirror gif behavior: if blob decode fails, continue with direct URL.
+        applyDirectUrl(video, project.video);
+        return;
+      }
+      video.pause();
+      video.style.opacity = "0";
+      thumb.style.opacity = "1";
+    });
+  } else if (youtubeFrame) {
+    queueDeferredAction(() => {
+      if (!expandedCard) return;
+      revealVideo();
+    }, 120);
+  }
 }
 
 
