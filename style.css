@@ -360,6 +360,14 @@ body {
   object-position: left top;
 }
 
+.primary-media video:fullscreen,
+.primary-media video:-webkit-full-screen,
+.primary-media video:-moz-full-screen,
+.primary-media video:-ms-fullscreen {
+  object-position: center center;
+  background: #000;
+}
+
 .gif-strip {
   display: flex;
   gap: 0;
@@ -419,6 +427,13 @@ body {
 .media-wrapper.portrait-media .primary-media video {
   object-fit: contain;
   object-position: left top;
+}
+
+.media-wrapper.portrait-media .primary-media video:fullscreen,
+.media-wrapper.portrait-media .primary-media video:-webkit-full-screen,
+.media-wrapper.portrait-media .primary-media video:-moz-full-screen,
+.media-wrapper.portrait-media .primary-media video:-ms-fullscreen {
+  object-position: center center;
 }
 
 .media-wrapper.portrait-media .gif-strip {
