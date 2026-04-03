@@ -2,7 +2,7 @@
 const projectDefs = [
   {
     folder: "P1",
-    title: "BYJU'S | 'Champions' New Batch Launch - Promo Video",
+    title: "'Champions' New Batch Launch - Promo Video | BYJU'S",
     orientation: "landscape", // or "portrait"
     projectType: "Video Editing, Typography Design, and Motion Graphics & Transitions",
     desc: "Promotional video created for BYJU'S to announce the launch of the 'Champions' batch. The video was designed to build excitement, highlight key program strengths, and maintain brand consistency while delivering high-energy visual storytelling. A visually engaging promo video that effectively communicates the value of the new batch and captures learner attention across digital platforms.",
@@ -13,10 +13,10 @@ const projectDefs = [
   },
   {
     folder: "P2",
-    title: "BYJU'S | Content Marketing | Fizz - Cold vs Hot Drink",
+    title: "Fizz - Cold vs Hot Drink | Content Marketing | BYJU'S",
     orientation: "portrait", // or "landscape"
-    projectType: "Editing, Typography & Motion Graphics",
-    desc: "Automated corporate & marketing videos.",
+    projectType: "Motion Graphics and Animations",
+    desc: " Created a high-quality content marketing video for BYJU’S, optimized for short-form platforms like Instagram Reels and YouTube Shorts, with a strong focus on detailed and visually engaging motion graphics. I transformed the provided Illustrator frames into dynamic animations, making subtle design adjustments to better suit motion requirements and enhance overall storytelling. The project included the use of particle effects to simulate elements like bubbles, adding depth and visual richness, while maintaining smooth transitions and seamless continuity across different sections of the video. ",
     tools: ["After Effects", "Premiere Pro", "Illustrator"],
     videoName: "Vid.webm",
     thumbName: "Thumb.webp",
@@ -24,10 +24,20 @@ const projectDefs = [
   },
 {
     folder: "P3",
-    title: "BYJU'S | Experiment Shorts | Hot vs Cold Water ",
+    title: "Hot vs Cold Water | Experiment Shorts | BYJU'S",
     orientation: "portrait", // or "landscape"
+    projectType: "Editing, Typography & Motion Effects",
+    desc: "Created a content marketing video for BYJU’S optimized for YouTube Shorts, focusing on structuring and organizing footage to deliver a clear, engaging narrative within a one-minute format. This project emphasized experimenting with pacing and flow to ensure the content remained easy to understand while maintaining viewer attention. Motion graphics and visual effects were incorporated to enhance engagement and support the overall storytelling.",
+    tools: ["After Effects", "Premiere Pro"],
+    videoName: "Vid.webm",
+    thumbName: "Thumb.webp",
+    gifCount: 4
+  },
+  {
+    folder: "P5",
+    title: "Why do Our Knuckles Pop and Crack | Content Marketing | BYJU'S",
     projectType: "Editing, Typography & Motion Graphics",
-    desc: "lor",
+    desc: "Created a high-quality content marketing video for BYJU’S, optimized for Instagram Reels and YouTube Shorts, featuring detailed and visually engaging motion graphics. I developed the animation using provided Illustrator frames, making necessary modifications to align with motion requirements and enhance visual clarity, with a strong focus on precision and overall design quality.",
     tools: ["After Effects", "Premiere Pro", "Illustrator"],
     videoName: "Vid.webm",
     thumbName: "Thumb.webp",
@@ -36,16 +46,6 @@ const projectDefs = [
   /*{
     folder: "P4",
     title: "lor",
-    projectType: "Editing, Typography & Motion Graphics",
-    desc: "lor",
-    tools: ["After Effects", "Premiere Pro", "Illustrator"],
-    videoName: "Vid.webm",
-    thumbName: "Thumb.webp",
-    gifCount: 4
-  },
-  {
-    folder: "P5",
-    title: "BYJU'S | Content Marketing | Why do Our Knuckles Pop and Crack ",
     projectType: "Editing, Typography & Motion Graphics",
     desc: "lor",
     tools: ["After Effects", "Premiere Pro", "Illustrator"],
@@ -313,6 +313,26 @@ document.addEventListener("DOMContentLoaded", function () {
     return media;
   }
 
+  function syncGifItemAspect(gifItem, gifMedia, prefersPortrait) {
+    if (prefersPortrait || !gifItem || !gifMedia) return;
+
+    const applyAspect = (width, height) => {
+      if (!width || !height) return;
+      gifItem.style.aspectRatio = `${width} / ${height}`;
+    };
+
+    if (gifMedia.tagName === "VIDEO") {
+      gifMedia.addEventListener("loadedmetadata", () => {
+        applyAspect(gifMedia.videoWidth, gifMedia.videoHeight);
+      }, { once: true });
+      return;
+    }
+
+    gifMedia.addEventListener("load", () => {
+      applyAspect(gifMedia.naturalWidth, gifMedia.naturalHeight);
+    }, { once: true });
+  }
+
   function buildSecondPassOrder(paths) {
     // Required order for 4 items: G2, G1, G4, G3
     if (paths.length === 4) {
@@ -482,7 +502,7 @@ document.addEventListener("DOMContentLoaded", function () {
     mediaWrapper.style.setProperty("--portrait-gif-cols", `${portraitCols}`);
 
     const secondPass = buildSecondPassOrder(gifPaths);
-    const stripPaths = [...gifPaths, ...secondPass];
+    const stripPaths = prefersPortrait ? [...gifPaths, ...secondPass] : gifPaths;
 
     stripPaths.forEach((gifPath, gifIndex) => {
       const gifItem = document.createElement("div");
@@ -490,6 +510,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const gifMedia = createStripMediaElement(gifPath, `${project.title} gif ${gifIndex + 1}`);
       gifMedia.src = "";
+      syncGifItemAspect(gifItem, gifMedia, prefersPortrait);
 
       if (gifMedia.tagName === "VIDEO" && gifIndex >= gifPaths.length) {
         const secondPassIndex = gifIndex - gifPaths.length;
