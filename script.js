@@ -36,6 +36,7 @@ const projectDefs = [
   {
     folder: "P5",
     title: "Why do Our Knuckles Pop and Crack | Content Marketing | BYJU'S",
+    orientation: "portrait", // or "landscape"
     projectType: "Editing, Typography & Motion Graphics",
     desc: "Created a high-quality content marketing video for BYJU’S, optimized for Instagram Reels and YouTube Shorts, featuring detailed and visually engaging motion graphics. I developed the animation using provided Illustrator frames, making necessary modifications to align with motion requirements and enhance visual clarity, with a strong focus on precision and overall design quality.",
     tools: ["After Effects", "Premiere Pro", "Illustrator"],
