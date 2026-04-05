@@ -568,7 +568,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const videoLoader = document.createElement("div");
   videoLoader.className = "video-loader";
   videoLoader.setAttribute("aria-hidden", "true");
-  videoLoader.innerHTML = `<span class="video-loader-label">Loading video</span>`;
+  videoLoader.innerHTML = `
+    <span class="video-loader-spinner"></span>
+    <span class="video-loader-label">Video is loading</span>
+  `;
   primaryMedia.appendChild(videoLoader);
 
   mediaWrapper.appendChild(primaryMedia);
@@ -798,14 +801,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let hasRevealedVideo = false;
   let hasStartedThumbFade = false;
-  const hideLoader = () => {
-    if (!expandedCard) return;
-    primaryMedia.classList.remove("is-loading");
-  };
   const startThumbFade = () => {
     if (hasStartedThumbFade || !expandedCard) return;
     hasStartedThumbFade = true;
-    hideLoader();
+    primaryMedia.classList.remove("is-loading");
     thumb.style.opacity = "0";
   };
   const revealVideo = () => {
@@ -827,7 +826,7 @@ document.addEventListener("DOMContentLoaded", function () {
       applyDirectUrl(video, project.video);
       return;
     }
-    hideLoader();
+    primaryMedia.classList.remove("is-loading");
     video.pause();
     video.style.opacity = "0";
     thumb.style.opacity = "1";
