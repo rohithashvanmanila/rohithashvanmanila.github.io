@@ -385,12 +385,15 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
+  z-index: 4;
   width: 44px;
   height: 44px;
   margin: -22px 0 0 -22px;
   border-radius: 50%;
   border: 3px solid rgba(148, 163, 184, 0.25);
   border-top-color: #38bdf8;
+  background: rgba(15, 23, 42, 0.36);
+  box-shadow: 0 8px 18px rgba(2, 6, 23, 0.22);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
