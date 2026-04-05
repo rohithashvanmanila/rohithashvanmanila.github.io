@@ -796,38 +796,29 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }, openStateDelay);
 
-  const loaderShownAt = performance.now();
-  const minLoaderDuration = 450;
   let hasRevealedVideo = false;
   let hasStartedThumbFade = false;
-  let loadingStateFinished = false;
-  const finishLoadingState = () => {
-    if (loadingStateFinished || !expandedCard) return;
-    loadingStateFinished = true;
+  const hideLoader = () => {
+    if (!expandedCard) return;
     primaryMedia.classList.remove("is-loading");
   };
   const startThumbFade = () => {
     if (hasStartedThumbFade || !expandedCard) return;
     hasStartedThumbFade = true;
+    hideLoader();
     thumb.style.opacity = "0";
   };
   const revealVideo = () => {
     if (hasRevealedVideo || !expandedCard) return;
     hasRevealedVideo = true;
-    const elapsed = performance.now() - loaderShownAt;
-    const remaining = Math.max(0, minLoaderDuration - elapsed);
-    window.setTimeout(() => {
-      if (!expandedCard) return;
-      finishLoadingState();
-      startThumbFade();
-      video.style.opacity = "1";
-      video.play().catch(() => {});
-    }, remaining);
+    startThumbFade();
+    video.style.opacity = "1";
+    video.play().catch(() => {});
   };
 
-  video.addEventListener("loadeddata", startThumbFade, { once: true });
   video.addEventListener("loadeddata", revealVideo, { once: true });
   video.addEventListener("canplay", revealVideo, { once: true });
+  video.addEventListener("playing", revealVideo, { once: true });
 
   video.addEventListener("error", () => {
     const current = video.currentSrc || video.src || "";
@@ -836,7 +827,7 @@ document.addEventListener("DOMContentLoaded", function () {
       applyDirectUrl(video, project.video);
       return;
     }
-    finishLoadingState();
+    hideLoader();
     video.pause();
     video.style.opacity = "0";
     thumb.style.opacity = "1";
