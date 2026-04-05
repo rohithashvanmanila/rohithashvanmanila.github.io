@@ -2,10 +2,18 @@
 const projectDefs = [
   {
     folder: "P1",
-    title: "'Champions' New Batch Launch - Promo Video | BYJU'S",
+    title: "Champions Launch",
     orientation: "landscape", // or "portrait"
-    projectType: "Video Editing, Typography Design, and Motion Graphics & Transitions",
-    desc: "Promotional video created for BYJU'S to announce the launch of the 'Champions' batch. The video was designed to build excitement, highlight key program strengths, and maintain brand consistency while delivering high-energy visual storytelling. A visually engaging promo video that effectively communicates the value of the new batch and captures learner attention across digital platforms.",
+    disclaimer: "© Created as part of professional work. For portfolio use only. All rights belong to respective owners.",
+    projectType: "Video Editing • Motion Graphics • Typography",
+    focus: "Built as a high-energy launch piece with clear hierarchy, quick pacing, and a strong sense of build-up.\nThe aim was to make the announcement feel immediate, polished, and easy to follow.",
+    contribution: [
+      "Structured the edit to create momentum across the launch message.",
+      "Designed and animated typography for key callouts.",
+      "Integrated motion graphics to support the promo tone.",
+      "Refined transitions and timing for a sharper overall flow."
+    ],
+    desc: "A promo video created to introduce a new batch in a way that felt fast, clear, and visually driven.\n\nThe edit focused on momentum, strong text hierarchy, and motion-led transitions to hold attention while keeping the message clean.",
     tools: ["After Effects", "Premiere Pro", "Illustrator"],
     videoName: "Vid.webm",
     thumbName: "Thumb.webp",
@@ -13,21 +21,37 @@ const projectDefs = [
   },
   {
     folder: "P2",
-    title: "Fizz - Cold vs Hot Drink | Content Marketing | BYJU'S",
+    title: "Fizz: Cold vs Hot",
     orientation: "portrait", // or "landscape"
-    projectType: "Motion Graphics and Animations",
-    desc: " Created a high-quality content marketing video for BYJU’S, optimized for short-form platforms like Instagram Reels and YouTube Shorts, with a strong focus on detailed and visually engaging motion graphics. I transformed the provided Illustrator frames into dynamic animations, making subtle design adjustments to better suit motion requirements and enhance overall storytelling. The project included the use of particle effects to simulate elements like bubbles, adding depth and visual richness, while maintaining smooth transitions and seamless continuity across different sections of the video. ",
+    disclaimer: "© Created as part of professional work. For portfolio use only. All rights belong to respective owners.",
+    projectType: "Motion Graphics • Animation",
+    focus: "The visual approach was playful, bright, and motion-first, with attention on making static artwork feel lively on screen.\nI focused on readability, rhythm, and small visual details that added energy without overcrowding the frame.",
+    contribution: [
+      "Animated supplied design frames for a short-form marketing piece.",
+      "Adjusted layouts and elements to improve motion clarity.",
+      "Added particle details and secondary movement for depth.",
+      "Built transitions that kept the piece smooth and connected."
+    ],
+    desc: "A short-form content piece built to make a simple comparison feel visually engaging and easy to watch on mobile.\n\nThe process centered on turning static frames into fluid animation, refining elements for motion, and adding texture through transitions and particle details.",
     tools: ["After Effects", "Premiere Pro", "Illustrator"],
     videoName: "Vid.webm",
     thumbName: "Thumb.webp",
     gifCount: 4
   },
-{
+  {
     folder: "P3",
-    title: "Hot vs Cold Water | Experiment Shorts | BYJU'S",
+    title: "Hot vs Cold Water",
     orientation: "portrait", // or "landscape"
-    projectType: "Editing, Typography & Motion Effects",
-    desc: "Created a content marketing video for BYJU’S optimized for YouTube Shorts, focusing on structuring and organizing footage to deliver a clear, engaging narrative within a one-minute format. This project emphasized experimenting with pacing and flow to ensure the content remained easy to understand while maintaining viewer attention. Motion graphics and visual effects were incorporated to enhance engagement and support the overall storytelling.",
+    disclaimer: "© Created as part of professional work. For portfolio use only. All rights belong to respective owners.",
+    projectType: "Editing • Typography • Motion Effects",
+    focus: "Approached as a compact experiment-led short where clarity mattered more than complexity.\nThe goal was to make the story quick to understand while still feeling paced and polished.",
+    contribution: [
+      "Structured the footage into a concise short-form edit.",
+      "Balanced pacing for clarity within a tight runtime.",
+      "Added typography and motion accents to improve engagement.",
+      "Refined transitions and timing for a smoother viewing flow."
+    ],
+    desc: "A short-form experiment video designed to communicate a simple idea quickly and clearly.\n\nThe edit focused on structure, pacing, and supporting motion so the content stayed easy to follow while still feeling dynamic enough for short-form platforms.",
     tools: ["After Effects", "Premiere Pro"],
     videoName: "Vid.webm",
     thumbName: "Thumb.webp",
@@ -35,20 +59,35 @@ const projectDefs = [
   },
   {
     folder: "P5",
-    title: "Why do Our Knuckles Pop and Crack | Content Marketing | BYJU'S",
+    title: "Why Knuckles Crack",
     orientation: "portrait", // or "landscape"
-    projectType: "Editing, Typography & Motion Graphics",
-    desc: "Created a high-quality content marketing video for BYJU’S, optimized for Instagram Reels and YouTube Shorts, featuring detailed and visually engaging motion graphics. I developed the animation using provided Illustrator frames, making necessary modifications to align with motion requirements and enhance visual clarity, with a strong focus on precision and overall design quality.",
+    disclaimer: "© Created as part of professional work. For portfolio use only. All rights belong to respective owners.",
+    projectType: "Editing • Typography • Motion Graphics",
+    focus: "The piece was shaped to make an educational topic feel light, clear, and visually polished.\nI focused on motion precision and clean visual communication so the content stayed informative without feeling heavy.",
+    contribution: [
+      "Animated supplied artwork into a short-form explainer.",
+      "Adjusted design elements for better legibility in motion.",
+      "Handled pacing and composition for social-first delivery.",
+      "Polished the final edit with clean, precise motion details."
+    ],
+    desc: "A short educational explainer designed to make a familiar question feel engaging in a quick, mobile-friendly format.\n\nThe process focused on translating supplied visuals into clear motion, tightening readability, and using polished animation to keep the information approachable.",
     tools: ["After Effects", "Premiere Pro", "Illustrator"],
     videoName: "Vid.webm",
     thumbName: "Thumb.webp",
     gifCount: 4
   },
-  /*{
+  {
     folder: "P4",
-    title: "lor",
-    projectType: "Editing, Typography & Motion Graphics",
-    desc: "lor",
+    title: "Project Title",
+    disclaimer: "© Created as part of professional work. For portfolio use only. All rights belong to respective owners.",
+    focus: "Add 1-2 lines about the creative intent or approach behind this project.",
+    contribution: [
+      "Add contribution point 1.",
+      "Add contribution point 2.",
+      "Add contribution point 3."
+    ],
+    projectType: "Editing • Typography • Motion Graphics",
+    desc: "Add a short 2-3 paragraph description explaining what the project was made for and what you focused on during execution.",
     tools: ["After Effects", "Premiere Pro", "Illustrator"],
     videoName: "Vid.webm",
     thumbName: "Thumb.webp",
@@ -56,14 +95,21 @@ const projectDefs = [
   },
   {
     folder: "P6",
-    title: "lor",
-    projectType: "Editing, Typography & Motion Graphics",
-    desc: "lor",
+    title: "Project Title",
+    disclaimer: "© Created as part of professional work. For portfolio use only. All rights belong to respective owners.",
+    focus: "Add 1-2 lines about the creative intent or approach behind this project.",
+    contribution: [
+      "Add contribution point 1.",
+      "Add contribution point 2.",
+      "Add contribution point 3."
+    ],
+    projectType: "Editing • Typography • Motion Graphics",
+    desc: "Add a short 2-3 paragraph description explaining what the project was made for and what you focused on during execution.",
     tools: ["After Effects", "Premiere Pro", "Illustrator"],
     videoName: "Vid.webm",
     thumbName: "Thumb.webp",
     gifCount: 4
-  },*/
+  },
 ];
 
 const DEFAULT_MEDIA_NAMES = {
@@ -84,6 +130,9 @@ function buildProjectAssets(def) {
   return {
     ...def,
     orientation: def.orientation || "",
+    disclaimer: def.disclaimer || "",
+    focus: def.focus || "",
+    contribution: Array.isArray(def.contribution) ? def.contribution : [],
     video: `${base}/${videoName}`,
     thumb: `${base}/${thumbName}`,
     gifs: Array.from({ length: gifCount }, (_, i) => `${base}/${gifPrefix}${i + 1}.${gifExt}`)
@@ -379,6 +428,51 @@ document.addEventListener("DOMContentLoaded", function () {
     card.style.setProperty("--reveal-delay", `${Math.min(index * 70, 420)}ms`);
   });
 
+  let centerCardFrame = null;
+
+  function usesCenteredProjectPreview() {
+    return window.matchMedia("(hover: none), (pointer: coarse)").matches;
+  }
+
+  function updateCenteredProjectCard() {
+    centerCardFrame = null;
+
+    if (!usesCenteredProjectPreview() || expandedCard) {
+      cards.forEach((card) => card.classList.remove("is-centered"));
+      return;
+    }
+
+    const viewportCenterY = window.innerHeight * 0.5;
+    let centeredCard = null;
+    let closestDistance = Infinity;
+
+    cards.forEach((card) => {
+      const rect = card.getBoundingClientRect();
+
+      if (rect.bottom <= 0 || rect.top >= window.innerHeight) {
+        card.classList.remove("is-centered");
+        return;
+      }
+
+      const cardCenterY = rect.top + rect.height / 2;
+      const distance = Math.abs(cardCenterY - viewportCenterY);
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        centeredCard = card;
+      }
+    });
+
+    cards.forEach((card) => {
+      card.classList.toggle("is-centered", card === centeredCard);
+    });
+  }
+
+  function scheduleCenteredProjectCardUpdate() {
+    if (centerCardFrame !== null) return;
+    centerCardFrame = window.requestAnimationFrame(updateCenteredProjectCard);
+  }
+
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -392,6 +486,11 @@ document.addEventListener("DOMContentLoaded", function () {
   } else {
     cards.forEach((card) => card.classList.add("is-visible"));
   }
+
+  window.addEventListener("scroll", scheduleCenteredProjectCardUpdate, { passive: true });
+  window.addEventListener("resize", scheduleCenteredProjectCardUpdate);
+  window.addEventListener("orientationchange", scheduleCenteredProjectCardUpdate);
+  scheduleCenteredProjectCardUpdate();
 
   /* ===== OPEN CARD ===== */
   grid.addEventListener("click", function (e) {
@@ -440,6 +539,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const primaryMedia = document.createElement("div");
   primaryMedia.className = "primary-media";
+  primaryMedia.classList.add("is-loading");
 
   const thumb = document.createElement("img");
   thumb.className = "main-thumb";
@@ -454,7 +554,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const video = document.createElement("video");
   video.className = "main-video";
   video.src = "";
-  video.muted = true;
+  video.muted = false;
   video.autoplay = true;
   video.playsInline = true;
   video.controls = true;
@@ -464,9 +564,16 @@ document.addEventListener("DOMContentLoaded", function () {
   video.addEventListener("contextmenu", (e) => e.preventDefault());
   video.style.opacity = "0";
   primaryMedia.appendChild(video);
+
+  const videoLoader = document.createElement("div");
+  videoLoader.className = "video-loader";
+  videoLoader.setAttribute("aria-hidden", "true");
+  primaryMedia.appendChild(videoLoader);
+
   mediaWrapper.appendChild(primaryMedia);
   applyBlobUrl(video, project.video).then((ok) => {
     if (!ok) {
+      primaryMedia.classList.remove("is-loading");
       video.remove();
       thumb.style.opacity = "1";
     }
@@ -561,6 +668,34 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const content = document.createElement("div");
   content.className = "content-side";
+  const focusMarkup = project.focus
+    ? `
+      <div class="project-focus">
+        <h3>Creative Focus</h3>
+        <p>${project.focus.replace(/\n/g, "<br>")}</p>
+      </div>
+    `
+    : "";
+  const contributionItems = Array.isArray(project.contribution) ? project.contribution.filter(Boolean) : [];
+  const contributionMarkup = contributionItems.length
+    ? `
+      <div class="project-contribution">
+        <h3>Contribution</h3>
+        <ul>
+          ${contributionItems.map((item) => `<li>${item}</li>`).join("")}
+        </ul>
+      </div>
+    `
+    : "";
+  const creditMarkup = project.disclaimer
+    ? `<p class="project-credit">${project.disclaimer}</p>`
+    : "";
+  const descriptionMarkup = String(project.desc || "")
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .map((paragraph) => `<p>${paragraph.replace(/\n/g, "<br>")}</p>`)
+    .join("");
   const tools = Array.isArray(project.tools) ? project.tools : [];
   const toolsMarkup = tools.length
     ? `
@@ -580,8 +715,11 @@ document.addEventListener("DOMContentLoaded", function () {
     : "";
   content.innerHTML = `
     <h2>${project.title}</h2>
-    <p class="project-type"><strong> My Role: </strong> ${project.projectType || "Editing, Typography & Motion Graphics"}</p>
-    <p>${project.desc}</p>
+    <p class="project-type"><span class="role-label">My Role</span><span class="role-value">${project.projectType || "Editing • Typography • Motion Graphics"}</span></p>
+    <div class="project-description">${descriptionMarkup}</div>
+    ${focusMarkup}
+    ${contributionMarkup}
+    ${creditMarkup}
     ${toolsMarkup}
   `;
 
@@ -667,6 +805,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const revealVideo = () => {
     if (hasRevealedVideo || !expandedCard) return;
     hasRevealedVideo = true;
+    primaryMedia.classList.remove("is-loading");
     startThumbFade();
     video.style.opacity = "1";
     video.play().catch(() => {});
@@ -683,6 +822,7 @@ document.addEventListener("DOMContentLoaded", function () {
       applyDirectUrl(video, project.video);
       return;
     }
+    primaryMedia.classList.remove("is-loading");
     video.pause();
     video.style.opacity = "0";
     thumb.style.opacity = "1";
@@ -733,6 +873,7 @@ function closeActiveCard() {
       isClosing = false;
       currentAnim = null;
       updatePortraitLayout = () => {};
+      scheduleCenteredProjectCardUpdate();
     }, morphDuration);
   }, panelDuration);
 }
@@ -765,15 +906,37 @@ function closeActiveCard() {
     e.preventDefault();
     e.stopPropagation();
   }, true);
+  document.addEventListener("copy", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+  document.addEventListener("cut", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+  document.addEventListener("selectstart", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+  document.addEventListener("dragstart", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
   document.addEventListener("keydown", (e) => {
     const key = (e.key || "").toLowerCase();
     const hasPrimaryModifier = e.ctrlKey || e.metaKey;
-    if (!hasPrimaryModifier) return;
+    const isShiftPressed = e.shiftKey;
+    const shouldBlock =
+      key === "f12" ||
+      (hasPrimaryModifier && key === "s") ||
+      (hasPrimaryModifier && key === "u") ||
+      (hasPrimaryModifier && key === "p") ||
+      (hasPrimaryModifier && isShiftPressed && ["i", "j", "c"].includes(key));
 
-    if (key === "s") {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+    if (!shouldBlock) return;
+
+    e.preventDefault();
+    e.stopPropagation();
   }, true);
 
 });
