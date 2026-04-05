@@ -568,6 +568,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const videoLoader = document.createElement("div");
   videoLoader.className = "video-loader";
   videoLoader.setAttribute("aria-hidden", "true");
+  videoLoader.innerHTML = `<span class="video-loader-label">Loading video</span>`;
   primaryMedia.appendChild(videoLoader);
 
   mediaWrapper.appendChild(primaryMedia);
@@ -795,8 +796,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }, openStateDelay);
 
+  const loaderShownAt = performance.now();
+  const minLoaderDuration = 450;
   let hasRevealedVideo = false;
   let hasStartedThumbFade = false;
+  let loadingStateFinished = false;
+  const finishLoadingState = () => {
+    if (loadingStateFinished || !expandedCard) return;
+    loadingStateFinished = true;
+    primaryMedia.classList.remove("is-loading");
+  };
   const startThumbFade = () => {
     if (hasStartedThumbFade || !expandedCard) return;
     hasStartedThumbFade = true;
@@ -805,10 +814,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const revealVideo = () => {
     if (hasRevealedVideo || !expandedCard) return;
     hasRevealedVideo = true;
-    primaryMedia.classList.remove("is-loading");
-    startThumbFade();
-    video.style.opacity = "1";
-    video.play().catch(() => {});
+    const elapsed = performance.now() - loaderShownAt;
+    const remaining = Math.max(0, minLoaderDuration - elapsed);
+    window.setTimeout(() => {
+      if (!expandedCard) return;
+      finishLoadingState();
+      startThumbFade();
+      video.style.opacity = "1";
+      video.play().catch(() => {});
+    }, remaining);
   };
 
   video.addEventListener("loadeddata", startThumbFade, { once: true });
@@ -822,7 +836,7 @@ document.addEventListener("DOMContentLoaded", function () {
       applyDirectUrl(video, project.video);
       return;
     }
-    primaryMedia.classList.remove("is-loading");
+    finishLoadingState();
     video.pause();
     video.style.opacity = "0";
     thumb.style.opacity = "1";
