@@ -340,7 +340,7 @@ body {
   justify-content: flex-start;
   flex: 1 1 100%;
   min-width: 0;
-  background: #020617;
+  background: #e5e7eb;
   transition: flex-basis 0.35s ease;
   overflow: hidden;
 }
@@ -350,7 +350,8 @@ body {
   width: 100%;
   flex: 0 0 auto;
   aspect-ratio: var(--media-aspect, 16 / 9);
-  background: #000;
+  background: #e5e7eb;
+  overflow: hidden;
 }
 
 .primary-media::after {
@@ -386,18 +387,11 @@ body {
 
 .video-loader {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  inset: 0;
   z-index: 4;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  place-items: center;
   gap: 8px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: rgba(15, 23, 42, 0.62);
-  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.24);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
@@ -406,6 +400,17 @@ body {
 .primaryMedia.is-loading .video-loader,
 .primary-media.is-loading .video-loader {
   opacity: 1;
+}
+
+.video-loader-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.62);
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.24);
 }
 
 .video-loader-spinner {

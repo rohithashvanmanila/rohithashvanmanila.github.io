@@ -497,8 +497,10 @@ document.addEventListener("DOMContentLoaded", function () {
   videoLoader.className = "video-loader";
   videoLoader.setAttribute("aria-hidden", "true");
   videoLoader.innerHTML = `
-    <span class="video-loader-spinner"></span>
-    <span class="video-loader-label">Video is loading</span>
+    <div class="video-loader-inner">
+      <span class="video-loader-spinner"></span>
+      <span class="video-loader-label">Video is loading</span>
+    </div>
   `;
   primaryMedia.appendChild(videoLoader);
 
