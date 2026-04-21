@@ -170,7 +170,6 @@ document.addEventListener("DOMContentLoaded", function () {
   let isClosing = false;
   let updatePortraitLayout = () => {};
   let currentAnim = null;
-  let activeObjectUrls = [];
   let deferredLoadTimers = [];
 
   function lockMediaInteractions(root = document) {
@@ -202,24 +201,6 @@ document.addEventListener("DOMContentLoaded", function () {
     };
   }
 
-  function revokeActiveObjectUrls() {
-    if (!activeObjectUrls.length) return;
-
-    const usedBlobUrls = new Set(
-      [...document.querySelectorAll("img, video, source")]
-        .map((el) => el.currentSrc || el.src || "")
-        .filter((src) => src.startsWith("blob:"))
-    );
-
-    const revokeQueue = activeObjectUrls.filter((url) => !usedBlobUrls.has(url));
-    activeObjectUrls = activeObjectUrls.filter((url) => usedBlobUrls.has(url));
-
-    // Delay revoke slightly so browsers finish pending decode/load tasks.
-    window.setTimeout(() => {
-      revokeQueue.forEach((url) => URL.revokeObjectURL(url));
-    }, 1500);
-  }
-
   function clearDeferredLoadTimers() {
     deferredLoadTimers.forEach((timerId) => window.clearTimeout(timerId));
     deferredLoadTimers = [];
@@ -248,20 +229,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  function inferMimeFromPath(path, tagName) {
-    const lower = (path || "").toLowerCase();
-    if (tagName === "VIDEO") {
-      if (lower.endsWith(".webm")) return "video/webm";
-      if (lower.endsWith(".mp4")) return "video/mp4";
-      return "video/webm";
-    }
-    if (lower.endsWith(".svg")) return "image/svg+xml";
-    if (lower.endsWith(".webp")) return "image/webp";
-    if (lower.endsWith(".png")) return "image/png";
-    if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
-    return "image/*";
-  }
-
   function normalizeMediaPath(mediaPath) {
     return String(mediaPath || "")
       .trim()
@@ -284,55 +251,16 @@ document.addEventListener("DOMContentLoaded", function () {
     return /(^|\/)Vid\.webm$/i.test(relativePath);
   }
 
-  async function applyBlobUrl(element, mediaUrl, trackForRevoke = true) {
+  function applyBlobUrl(element, mediaUrl) {
     const relativePath = normalizeMediaPath(mediaUrl);
-    const directUrl = new URL(relativePath, SCRIPT_BASE_URL).href;
 
-    // Blob URL is only for the main project video (Vid.webm).
-    if (element.tagName !== "VIDEO" || !isMainVideoFile(relativePath)) {
+    // Use direct URLs for the main project videos so the browser can stream
+    // with normal range requests instead of waiting for a full blob fetch.
+    if (element.tagName === "VIDEO" && isMainVideoFile(relativePath)) {
       return applyDirectUrl(element, mediaUrl);
     }
 
-    const fallbackToDirect = () => {
-      element.src = directUrl;
-      if (element.tagName === "VIDEO") {
-        element.load();
-      }
-    };
-    try {
-      const res = await fetch(directUrl, { cache: "default" });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const rawBlob = await res.blob();
-      const headerMime = (res.headers.get("content-type") || "").toLowerCase();
-      const receivedMime = (rawBlob.type || headerMime || "").toLowerCase();
-
-      if (receivedMime.startsWith("text/html")) {
-        throw new Error("Received HTML instead of media");
-      }
-
-      let finalBlob = rawBlob;
-      if (!receivedMime || receivedMime === "application/octet-stream") {
-        const expectedMime = inferMimeFromPath(directUrl, element.tagName);
-        finalBlob = rawBlob.slice(0, rawBlob.size, expectedMime);
-      }
-
-      const blobUrl = URL.createObjectURL(finalBlob);
-      if (trackForRevoke) {
-        activeObjectUrls.push(blobUrl);
-      }
-
-      // Some hosts/browsers fail to decode blob URLs for certain media types.
-      element.addEventListener("error", fallbackToDirect, { once: true });
-      element.src = blobUrl;
-      if (element.tagName === "VIDEO") {
-        element.load();
-      }
-      return true;
-    } catch (error) {
-      fallbackToDirect();
-      return true;
-    }
+    return applyDirectUrl(element, mediaUrl);
   }
 
   function createStripMediaElement(mediaPath, altText) {
@@ -789,6 +717,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   const openStateDelay = prefersPortrait ? morphDuration + 40 : Math.max(140, morphDuration - 40);
+  const revealReadyAt = performance.now() + openStateDelay;
   setTimeout(() => {
     if (!expandedCard) return;
     expandedCard.classList.add("expanded-open");
@@ -810,9 +739,13 @@ document.addEventListener("DOMContentLoaded", function () {
   const revealVideo = () => {
     if (hasRevealedVideo || !expandedCard) return;
     hasRevealedVideo = true;
-    startThumbFade();
-    video.style.opacity = "1";
-    video.play().catch(() => {});
+    const remainingDelay = Math.max(0, revealReadyAt - performance.now());
+    window.setTimeout(() => {
+      if (!expandedCard) return;
+      startThumbFade();
+      video.style.opacity = "1";
+      video.play().catch(() => {});
+    }, remainingDelay);
   };
 
   video.addEventListener("loadeddata", revealVideo, { once: true });
@@ -870,7 +803,6 @@ function closeActiveCard() {
       backdrop.style.display = "none";
       document.body.style.overflow = "auto";
       activeCard.style.visibility = "";
-      revokeActiveObjectUrls();
       clearDeferredLoadTimers();
       expandedCard = null;
       activeCard = null;
