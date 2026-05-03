@@ -77,7 +77,7 @@ const projectDefs = [
     gifCount: 4
   },
   {
-    folder: "P4",
+    folder: "P7",
     title: "Project Title",
     disclaimer: "© Created as part of professional work. For portfolio use only. All rights belong to respective owners.",
     focus: "Add 1-2 lines about the creative intent or approach behind this project.",
